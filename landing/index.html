@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Agent 可视化工作台 — React Flow 编排、MCP 工具、Function Calling 与 SSE 执行监控"
+    />
+    <title>Agent 可视化工作台</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="container nav">
+      <div class="logo">Agent Workbench</div>
+      <nav class="nav-links">
+        <a href="#features">特性</a>
+        <a href="#arch">架构</a>
+        <a href="#demo">演示</a>
+      </nav>
+      <a class="btn btn-primary" id="nav-demo" href="#">在线体验</a>
+    </header>
+
+    <main>
+      <section class="container hero">
+        <span class="badge">前端 AI Agent · 面试演示向</span>
+        <h1>拖拽编排 Agent 工作流<br />MCP 工具 + 流式执行可视化</h1>
+        <p>
+          基于 React Flow 的可视化编排，接入 Filesystem / Fetch MCP，支持 Function Calling
+          调用链、SSE 实时监控与失败重试。适合展示你对 Agent 工程化的理解。
+        </p>
+        <div class="cta-row">
+          <a class="btn btn-primary" id="hero-demo" href="#">▶ 在线体验 Demo</a>
+          <a class="btn btn-secondary" id="hero-github" href="#" target="_blank" rel="noopener"
+            >GitHub 源码</a
+          >
+        </div>
+        <div class="screenshot" id="screenshot-slot">
+          录屏或截图放在 <code>landing/screenshot.png</code> 后自动展示（可选）
+        </div>
+      </section>
+
+      <section class="container section" id="features">
+        <h2>核心能力</h2>
+        <div class="grid-3">
+          <article class="card">
+            <h3>可视化编排</h3>
+            <p>Start / Agent / MCP Tool / Condition / End 节点，拖拽连线定义任务流。</p>
+          </article>
+          <article class="card">
+            <h3>MCP 工具集成</h3>
+            <p>官方 Filesystem Server + 内置 Fetch，工具列表与调用链一目了然。</p>
+          </article>
+          <article class="card">
+            <h3>执行可观测</h3>
+            <p>SSE 流式日志、节点状态、Function Calling 时间线，Mock 模式免 API Key 演示。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="container section" id="arch">
+        <h2>技术架构</h2>
+        <pre class="arch">┌─────────────┐     SSE      ┌──────────────────┐
+│ React Flow  │ ◄──────────► │ Express + Engine │
+│  画布编排   │   /api/run   │ WorkflowExecutor │
+└─────────────┘              └────────┬─────────┘
+                                      │ MCP SDK
+                              ┌───────┴───────┐
+                              │ Filesystem    │
+                              │ Fetch (内置)  │
+                              └───────────────┘</pre>
+      </section>
+
+      <section class="container section" id="demo">
+        <h2>3 分钟演示脚本</h2>
+        <ol class="demo-steps">
+          <li><strong>1.</strong> 打开在线 Demo，确认 MCP 已连接（Filesystem + Fetch）。</li>
+          <li><strong>2.</strong> 使用默认 Start → Agent → End，输入「分析某 URL」类任务。</li>
+          <li><strong>3.</strong> 点击运行，右侧展示 SSE 日志与 Tool Call 链。</li>
+          <li><strong>4.</strong> 说明 Mock 与真实 LLM 切换、节点重试与 MCP 沙箱目录。</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="container footer">
+      <p>MIT · 部署说明见仓库 <a id="footer-github" href="#">DEPLOY.md</a></p>
+    </footer>
+
+    <script src="config.js"></script>
+    <script>
+      const cfg = window.SITE_CONFIG || {};
+      const demo = cfg.demoUrl || '#';
+      const gh = cfg.githubUrl || '#';
+
+      ['nav-demo', 'hero-demo'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.href = demo;
+      });
+      ['hero-github', 'footer-github'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.href = gh;
+      });
+
+      const shot = document.getElementById('screenshot-slot');
+      const img = new Image();
+      img.src = 'screenshot.png';
+      img.alt = 'Agent Workbench 截图';
+      img.onload = () => {
+        shot.textContent = '';
+        shot.appendChild(img);
+      };
+    </script>
+  </body>
+</html>

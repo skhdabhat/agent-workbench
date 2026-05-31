@@ -1,0 +1,20 @@
+{
+  "name": "agent-workbench",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Agent 可视化工作台 + MCP 工具集成",
+  "workspaces": [
+    "client",
+    "server"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "npm run dev -w server",
+    "dev:client": "npm run dev -w client",
+    "build": "npm run build -w server && npm run build -w client",
+    "start": "npm run start -w server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

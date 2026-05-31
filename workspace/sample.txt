@@ -1,0 +1,2 @@
+Hello from Agent Workbench!
+This is a sample file for MCP filesystem demo.

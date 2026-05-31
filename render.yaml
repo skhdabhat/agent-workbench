@@ -1,0 +1,17 @@
+# Render Blueprint：一键部署完整 Demo（API + 前端静态 + MCP）
+# 文档：https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: agent-workbench
+    runtime: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: '20'
+      - key: PUBLIC_DEMO
+        value: 'true'
+      - key: NPM_CONFIG_PRODUCTION
+        value: 'false'
