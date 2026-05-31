@@ -14,8 +14,9 @@
     <header class="container nav">
       <div class="logo">Agent Workbench</div>
       <nav class="nav-links">
-        <a href="#features">特性</a>
-        <a href="#arch">架构</a>
+        <a href="#overview">概览</a>
+        <a href="#features">能力</a>
+        <a href="#showcase">结构</a>
         <a href="#demo">演示</a>
       </nav>
       <a class="btn btn-primary" id="nav-demo" href="#">在线体验</a>
@@ -23,20 +24,42 @@
 
     <main>
       <section class="container hero">
-        <span class="badge">前端 AI Agent · 面试演示向</span>
-        <h1>拖拽编排 Agent 工作流<br />MCP 工具 + 流式执行可视化</h1>
+        <span class="badge">Portfolio-ready AI Agent Workbench</span>
+        <h1>把 Agent 编排成可展示、可解释、可演示的工作流</h1>
         <p>
-          基于 React Flow 的可视化编排，接入 Filesystem / Fetch MCP，支持 Function Calling
-          调用链、SSE 实时监控与失败重试。适合展示你对 Agent 工程化的理解。
+          这是一套面向作品集与面试展示的 Agent 工作台：用拖拽编排任务流，接入 MCP 工具，
+          并以流式日志完整呈现 Function Calling 的执行过程。
         </p>
+        <div class="hero-meta">
+          <span>React Flow 编排</span>
+          <span>MCP + Fetch / Filesystem</span>
+          <span>SSE 实时可观测</span>
+        </div>
         <div class="cta-row">
-          <a class="btn btn-primary" id="hero-demo" href="#">▶ 在线体验 Demo</a>
+          <a class="btn btn-primary" id="hero-demo" href="#">在线体验 Demo</a>
           <a class="btn btn-secondary" id="hero-github" href="#" target="_blank" rel="noopener"
-            >GitHub 源码</a
-          >
+            >查看源码</a>
         </div>
         <div class="screenshot" id="screenshot-slot">
-          录屏或截图放在 <code>landing/screenshot.png</code> 后自动展示（可选）
+          将演示截图或录屏放到 <code>landing/screenshot.png</code> 后，这里会自动展示
+        </div>
+      </section>
+
+      <section class="container section" id="overview">
+        <h2>为什么这个项目值得展示</h2>
+        <div class="grid-3">
+          <article class="card">
+            <h3>面向真实演示场景</h3>
+            <p>默认提供 Mock 模式，未配置 API Key 时也能顺畅展示完整链路。</p>
+          </article>
+          <article class="card">
+            <h3>可视化完整执行过程</h3>
+            <p>节点状态、SSE 日志、Tool Call 轨迹都能在界面里直接看到。</p>
+          </article>
+          <article class="card">
+            <h3>适合作品集首页</h3>
+            <p>既能做在线 Demo，也能作为 GitHub 首页的展示入口页。</p>
+          </article>
         </div>
       </section>
 
@@ -53,9 +76,19 @@
           </article>
           <article class="card">
             <h3>执行可观测</h3>
-            <p>SSE 流式日志、节点状态、Function Calling 时间线，Mock 模式免 API Key 演示。</p>
+            <p>SSE 流式日志、节点状态、Function Calling 时间线，方便调试与演示。</p>
           </article>
         </div>
+      </section>
+
+      <section class="container section" id="showcase">
+        <h2>推荐的展示顺序</h2>
+        <ol class="showcase-steps">
+          <li><strong>1.</strong> 先看一眼产品定位：这是一个 Agent 任务编排工作台。</li>
+          <li><strong>2.</strong> 再看截图，快速建立“它长什么样”的印象。</li>
+          <li><strong>3.</strong> 接着浏览核心能力，理解它解决了什么问题。</li>
+          <li><strong>4.</strong> 最后看技术架构与演示脚本，明确它是怎么实现的、怎么演示的。</li>
+        </ol>
       </section>
 
       <section class="container section" id="arch">
