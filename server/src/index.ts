@@ -60,6 +60,16 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
+app.get('/api/config', (_req, res) => {
+  const hasKey = Boolean(process.env.OPENAI_API_KEY?.trim());
+  res.json({
+    llmConfigured: hasKey,
+    provider: process.env.LLM_PROVIDER || (hasKey ? 'openai' : 'mock'),
+    model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    publicDemo: PUBLIC_DEMO,
+  });
+});
+
 app.get('/api/mcp/servers', async (_req, res) => {
   try {
     const servers = mcpManager.getServers();
@@ -122,15 +132,18 @@ app.post('/api/workflow/run', async (req, res) => {
 });
 
 const clientDist = path.resolve(__dirname, '../../client/dist');
-app.use(express.static(clientDist));
-app.get('*', (_req, res) => {
-  const indexPath = path.join(clientDist, 'index.html');
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
+const hasClientDist = fs.existsSync(path.join(clientDist, 'index.html'));
+
+if (hasClientDist) {
+  app.use(express.static(clientDist));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+} else {
+  app.get('*', (_req, res) => {
     res.status(404).json({ error: 'Client not built. Run npm run build from repo root.' });
-  }
-});
+  });
+}
 
 async function bootstrap() {
   console.log('Connecting MCP servers...');

@@ -20,7 +20,7 @@ export const paletteItems: PaletteItem[] = [
     type: 'agent',
     label: 'Agent',
     icon: '🤖',
-    description: 'LLM + Function Calling',
+    description: '自动化任务 + Function Calling',
     defaultData: {
       label: 'Agent',
       prompt: '请帮我 fetch https://example.com 的内容',
@@ -32,7 +32,7 @@ export const paletteItems: PaletteItem[] = [
     type: 'tool',
     label: 'MCP 工具',
     icon: '🔧',
-    description: '直接调用 MCP 工具',
+    description: '调用外部 MCP 工具',
     defaultData: {
       label: 'Fetch URL',
       mcpServer: 'fetch',
@@ -45,7 +45,7 @@ export const paletteItems: PaletteItem[] = [
     type: 'condition',
     label: '条件分支',
     icon: '◇',
-    description: '根据表达式分支',
+    description: '根据条件决定分支',
     defaultData: {
       label: '条件',
       expression: 'lastOutput.length > 0',
@@ -67,21 +67,26 @@ interface Props {
 export function NodePalette({ onDragStart }: Props) {
   return (
     <div className="panel palette">
-      <h3>节点面板</h3>
+      <div className="panel-title-row">
+        <h3>节点库</h3>
+        <span className="panel-badge">{paletteItems.length}</span>
+      </div>
       <p className="panel-hint">拖拽到画布添加节点</p>
+
       <div className="palette-items">
         {paletteItems.map((item) => (
           <div
             key={item.type}
-            className="palette-item"
+            className={`palette-item palette-item--${item.type}`}
             draggable
             onDragStart={(e) => onDragStart(e, item)}
           >
-            <span className="palette-icon">{item.icon}</span>
-            <div>
+            <div className="palette-icon-wrap">{item.icon}</div>
+            <div className="palette-text">
               <div className="palette-label">{item.label}</div>
               <div className="palette-desc">{item.description}</div>
             </div>
+            <span className="palette-drag-hint">⠿</span>
           </div>
         ))}
       </div>

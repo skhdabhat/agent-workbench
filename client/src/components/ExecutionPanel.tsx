@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useWorkflowStore } from '../store/workflowStore';
 import { ToolCallChain } from './ToolCallChain';
+import { StreamingOutput } from './StreamingOutput';
 
 const eventTypeLabels: Record<string, string> = {
   workflow_start: '工作流启动',
@@ -15,7 +16,7 @@ const eventTypeLabels: Record<string, string> = {
 };
 
 export function ExecutionPanel() {
-  const { executionEvents, isRunning, nodeOutputs, mockMode, setMockMode } =
+  const { executionEvents, isRunning, mockMode, setMockMode, toolCalls, focusedToolCallId } =
     useWorkflowStore();
   const logRef = useRef<HTMLDivElement>(null);
 
@@ -25,66 +26,81 @@ export function ExecutionPanel() {
     }
   }, [executionEvents]);
 
+  useEffect(() => {
+    if (!focusedToolCallId || !logRef.current) return;
+    const el = logRef.current.querySelector(`[data-tool-id="${focusedToolCallId}"]`);
+    el?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }, [focusedToolCallId]);
+
+  const getToolCallIdForEvent = (eventIndex: number) => {
+    const callIndex = executionEvents.slice(0, eventIndex + 1).filter((e) => e.type === 'tool_call').length - 1;
+    return callIndex >= 0 ? toolCalls[callIndex]?.id : undefined;
+  };
+
   return (
-    <div className="panel execution-panel">
-      <div className="panel-header">
-        <h3>执行监控</h3>
+    <div className="execution-panel">
+      <div className="execution-panel-toolbar">
         <label className="mock-toggle">
           <input
             type="checkbox"
             checked={mockMode}
             onChange={(e) => setMockMode(e.target.checked)}
           />
-          Mock 模式
+          <span className="toggle-track">
+            <span className="toggle-thumb" />
+          </span>
+          Mock
         </label>
       </div>
 
       {isRunning && (
         <div className="running-indicator">
-          <span className="pulse" /> 执行中...
+          <span className="pulse" />
+          Agent 正在执行工作流…
         </div>
       )}
 
-      <div className="section-title">Function Calling 链路</div>
+      <StreamingOutput />
+
+      <div className="section-title">
+        <span>Function Calling 过程</span>
+      </div>
       <ToolCallChain />
 
-      <div className="section-title">流式日志</div>
+      <div className="section-title">
+        <span>参数日志</span>
+        <span className="section-count">{executionEvents.length}</span>
+      </div>
       <div className="event-log" ref={logRef}>
         {executionEvents.length === 0 ? (
           <p className="empty-hint">点击「运行工作流」开始执行</p>
         ) : (
-          executionEvents.map((ev, i) => (
-            <div key={i} className={`log-entry type-${ev.type}`}>
-              <span className="log-time">
-                {new Date(ev.timestamp).toLocaleTimeString()}
-              </span>
-              <span className="log-type">{eventTypeLabels[ev.type] ?? ev.type}</span>
-              {ev.nodeId && <span className="log-node">[{ev.nodeId}]</span>}
-              {ev.content && <span className="log-content">{ev.content}</span>}
-              {ev.message && <span className="log-error">{ev.message}</span>}
-              {ev.type === 'step_retry' && (
-                <span className="log-retry">
-                  第 {ev.attempt}/{ev.maxAttempts} 次重试
+          executionEvents.map((ev, i) => {
+            const toolId = ev.type === 'tool_call' ? getToolCallIdForEvent(i) : undefined;
+
+            return (
+              <div
+                key={i}
+                className={`log-entry type-${ev.type} ${toolId && focusedToolCallId === toolId ? 'log-entry--focused' : ''}`}
+                data-tool-id={toolId}
+              >
+                <span className="log-time">
+                  {new Date(ev.timestamp).toLocaleTimeString()}
                 </span>
-              )}
-            </div>
-          ))
+                <span className="log-type">{eventTypeLabels[ev.type] ?? ev.type}</span>
+                {ev.nodeId && <span className="log-node">{ev.nodeId}</span>}
+                {ev.content && <span className="log-content">{ev.content}</span>}
+                {ev.message && <span className="log-error">{ev.message}</span>}
+                {ev.type === 'step_retry' && (
+                  <span className="log-retry">
+                    第 {ev.attempt}/{ev.maxAttempts} 次重试
+                  </span>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
-
-      {Object.keys(nodeOutputs).length > 0 && (
-        <>
-          <div className="section-title">节点输出</div>
-          <div className="node-outputs">
-            {Object.entries(nodeOutputs).map(([nodeId, output]) => (
-              <div key={nodeId} className="node-output-item">
-                <strong>{nodeId}</strong>
-                <pre>{output}</pre>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
     </div>
   );
 }

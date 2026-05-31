@@ -3,98 +3,126 @@ import { Handle, Position, type NodeProps } from '@xyflow/react';
 import type { FlowNodeData } from '../../types';
 
 const statusColors: Record<string, string> = {
-  pending: '#64748b',
-  running: '#3b82f6',
-  success: '#22c55e',
-  error: '#ef4444',
-  retrying: '#f59e0b',
+  pending: '#52ffb8',
+  running: '#38bdf8',
+  success: '#52ffb8',
+  error: '#fb7185',
+  retrying: '#fbbf24',
+};
+
+const nodeMeta: Record<string, { color: string; tag: string }> = {
+  start: { color: '#52ffb8', tag: 'START' },
+  end: { color: '#52ffb8', tag: 'END' },
+  agent: { color: '#52ffb8', tag: 'AGENT' },
+  tool: { color: '#52ffb8', tag: 'TOOL' },
+  condition: { color: '#52ffb8', tag: 'IF' },
 };
 
 function NodeShell({
   children,
-  color,
+  type,
   status,
   selected,
 }: {
   children: React.ReactNode;
-  color: string;
+  type: string;
   status?: string;
   selected?: boolean;
 }) {
-  const borderColor = status ? statusColors[status] ?? color : color;
+  const meta = nodeMeta[type] ?? { color: '#52ffb8', tag: 'NODE' };
+  const borderColor = status ? statusColors[status] ?? meta.color : meta.color;
+
   return (
     <div
-      className={`custom-node ${selected ? 'selected' : ''}`}
-      style={{ borderColor, boxShadow: selected ? `0 0 0 2px ${borderColor}40` : undefined }}
+      className={`custom-node custom-node--${type} ${selected ? 'selected' : ''} ${status ? `status-${status}` : ''}`}
+      style={
+        {
+          '--node-accent': meta.color,
+          '--node-border': borderColor,
+        } as React.CSSProperties
+      }
     >
-      <div className="node-accent" style={{ background: color }} />
+      <div className="node-header">
+        <span className="node-tag">{meta.tag}</span>
+        {status && status !== 'pending' && <span className={`node-status-dot status-${status}`} />}
+      </div>
       {children}
     </div>
   );
 }
 
-export const StartNode = memo(({ data, selected }: NodeProps) => {
+export const StartNode = memo(({ data, selected, type }: NodeProps) => {
   const d = data as unknown as FlowNodeData;
   return (
-    <NodeShell color="#10b981" status={d.status} selected={selected}>
-      <Handle type="source" position={Position.Right} />
-      <div className="node-icon">▶</div>
-      <div className="node-label">{d.label || '开始'}</div>
+    <NodeShell type={type ?? 'start'} status={d.status} selected={selected}>
+      <Handle type="source" position={Position.Right} className="node-handle" />
+      <div className="node-body">
+        <div className="node-icon">▶</div>
+        <div className="node-label">{d.label || '开始'}</div>
+      </div>
     </NodeShell>
   );
 });
 
-export const EndNode = memo(({ data, selected }: NodeProps) => {
+export const EndNode = memo(({ data, selected, type }: NodeProps) => {
   const d = data as unknown as FlowNodeData;
   return (
-    <NodeShell color="#6366f1" status={d.status} selected={selected}>
-      <Handle type="target" position={Position.Left} />
-      <div className="node-icon">⏹</div>
-      <div className="node-label">{d.label || '结束'}</div>
+    <NodeShell type={type ?? 'end'} status={d.status} selected={selected}>
+      <Handle type="target" position={Position.Left} className="node-handle" />
+      <div className="node-body">
+        <div className="node-icon">⏹</div>
+        <div className="node-label">{d.label || '结束'}</div>
+      </div>
     </NodeShell>
   );
 });
 
-export const AgentNode = memo(({ data, selected }: NodeProps) => {
+export const AgentNode = memo(({ data, selected, type }: NodeProps) => {
   const d = data as unknown as FlowNodeData;
   return (
-    <NodeShell color="#8b5cf6" status={d.status} selected={selected}>
-      <Handle type="target" position={Position.Left} />
-      <Handle type="source" position={Position.Right} />
-      <div className="node-icon">🤖</div>
-      <div className="node-label">{d.label || 'Agent'}</div>
-      {d.prompt && <div className="node-sub">{d.prompt.slice(0, 40)}...</div>}
+    <NodeShell type={type ?? 'agent'} status={d.status} selected={selected}>
+      <Handle type="target" position={Position.Left} className="node-handle" />
+      <Handle type="source" position={Position.Right} className="node-handle" />
+      <div className="node-body">
+        <div className="node-icon">🤖</div>
+        <div className="node-label">{d.label || 'Agent'}</div>
+        {d.prompt && <div className="node-sub">{d.prompt.slice(0, 48)}…</div>}
+      </div>
     </NodeShell>
   );
 });
 
-export const ToolNode = memo(({ data, selected }: NodeProps) => {
+export const ToolNode = memo(({ data, selected, type }: NodeProps) => {
   const d = data as unknown as FlowNodeData;
   return (
-    <NodeShell color="#0ea5e9" status={d.status} selected={selected}>
-      <Handle type="target" position={Position.Left} />
-      <Handle type="source" position={Position.Right} />
-      <div className="node-icon">🔧</div>
-      <div className="node-label">{d.label || 'MCP Tool'}</div>
-      {d.toolName && (
-        <div className="node-sub">
-          {d.mcpServer}/{d.toolName}
-        </div>
-      )}
+    <NodeShell type={type ?? 'tool'} status={d.status} selected={selected}>
+      <Handle type="target" position={Position.Left} className="node-handle" />
+      <Handle type="source" position={Position.Right} className="node-handle" />
+      <div className="node-body">
+        <div className="node-icon">🔧</div>
+        <div className="node-label">{d.label || 'MCP Tool'}</div>
+        {d.toolName && (
+          <div className="node-sub">
+            {d.mcpServer}/{d.toolName}
+          </div>
+        )}
+      </div>
     </NodeShell>
   );
 });
 
-export const ConditionNode = memo(({ data, selected }: NodeProps) => {
+export const ConditionNode = memo(({ data, selected, type }: NodeProps) => {
   const d = data as unknown as FlowNodeData;
   return (
-    <NodeShell color="#f59e0b" status={d.status} selected={selected}>
-      <Handle type="target" position={Position.Left} />
-      <Handle type="source" position={Position.Right} id="true" style={{ top: '35%' }} />
-      <Handle type="source" position={Position.Right} id="false" style={{ top: '65%' }} />
-      <div className="node-icon">◇</div>
-      <div className="node-label">{d.label || '条件'}</div>
-      {d.expression && <div className="node-sub">{d.expression}</div>}
+    <NodeShell type={type ?? 'condition'} status={d.status} selected={selected}>
+      <Handle type="target" position={Position.Left} className="node-handle" />
+      <Handle type="source" position={Position.Right} id="true" style={{ top: '35%' }} className="node-handle" />
+      <Handle type="source" position={Position.Right} id="false" style={{ top: '65%' }} className="node-handle" />
+      <div className="node-body">
+        <div className="node-icon">◇</div>
+        <div className="node-label">{d.label || '条件'}</div>
+        {d.expression && <div className="node-sub">{d.expression}</div>}
+      </div>
     </NodeShell>
   );
 });

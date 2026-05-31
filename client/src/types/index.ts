@@ -2,6 +2,8 @@ export type NodeType = 'start' | 'agent' | 'tool' | 'condition' | 'end';
 
 export type StepStatus = 'pending' | 'running' | 'success' | 'error' | 'retrying' | 'skipped';
 
+export type OutputSource = 'agent' | 'tool' | 'system';
+
 export interface FlowNodeData {
   label: string;
   prompt?: string;
@@ -23,6 +25,7 @@ export interface ExecutionEvent {
   nodeType?: NodeType;
   status?: StepStatus;
   content?: string;
+  source?: OutputSource;
   tool?: string;
   mcpServer?: string;
   args?: Record<string, unknown>;
@@ -44,7 +47,7 @@ export interface MCPToolInfo {
 export interface MCPServerInfo {
   id: string;
   name: string;
-  status: 'connected' | 'disconnected' | 'error';
+  status: 'connected' | 'disconnected' | 'error' | 'pending';
   tools: MCPToolInfo[];
   error?: string;
 }
@@ -58,4 +61,7 @@ export interface ToolCallRecord {
   result?: unknown;
   status: StepStatus;
   timestamp: number;
+  completedAt?: number;
+  durationMs?: number;
+  error?: string;
 }

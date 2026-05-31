@@ -1,5 +1,6 @@
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { MCPServerInfo, MCPToolInfo } from '../types.js';
@@ -54,10 +55,12 @@ export class MCPManager {
 
     const fetchServerPath = path.resolve(__dirname, 'builtin-fetch-entry.ts');
     const tsxPath = path.resolve(process.cwd(), 'node_modules', 'tsx', 'dist', 'cli.mjs');
+    const fallbackTsxPath = path.resolve(process.cwd(), '..', 'node_modules', 'tsx', 'dist', 'cli.mjs');
+    const resolvedTsxPath = fs.existsSync(tsxPath) ? tsxPath : fallbackTsxPath;
 
     const transport = new StdioClientTransport({
       command: process.execPath,
-      args: [tsxPath, fetchServerPath],
+      args: [resolvedTsxPath, fetchServerPath],
     });
 
     const client = new Client(

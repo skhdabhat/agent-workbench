@@ -288,13 +288,32 @@ export class WorkflowExecutor {
     }
   }
 
+  private createOpenAIClient(): OpenAI {
+    const options: ConstructorParameters<typeof OpenAI>[0] = {
+      apiKey: process.env.OPENAI_API_KEY,
+    };
+
+    if (process.env.OPENAI_BASE_URL?.trim()) {
+      options.baseURL = process.env.OPENAI_BASE_URL.trim();
+    }
+
+    if (process.env.LLM_PROVIDER === 'github-models') {
+      options.defaultHeaders = {
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      };
+    }
+
+    return new OpenAI(options);
+  }
+
   private async runAgentOpenAI(
     nodeId: string,
     prompt: string,
     systemPrompt: string,
     model?: string
   ): Promise<void> {
-    const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const openai = this.createOpenAIClient();
     const mcpTools = await mcpManager.listAllTools();
 
     const openaiTools: OpenAI.Chat.ChatCompletionTool[] = mcpTools.map((t) => ({
