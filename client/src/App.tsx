@@ -8,7 +8,7 @@ import { ExecutionPanel } from './components/ExecutionPanel';
 import { NodeInspector } from './components/NodeInspector';
 import { WorkflowManager, autosaveWorkflow } from './components/WorkflowManager';
 import { useWorkflowExecution } from './hooks/useWorkflowExecution';
-import { hasSeenIntro, markIntroSeen } from './lib/introStorage';
+import { hasSeenIntro, markIntroSeen, shouldForceIntro } from './lib/introStorage';
 import { useWorkflowStore } from './store/workflowStore';
 import { loadWorkflowFromStorage } from './lib/workflowStorage';
 import type { FlowNodeData } from './types';
@@ -96,26 +96,36 @@ export default function App() {
   }>({ configured: false });
 
   const introPreviewRef = useRef(false);
+  const moduleRevealStartedRef = useRef(false);
   const [introVisible, setIntroVisible] = useState(() => {
     if (typeof window === 'undefined') return false;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false;
+    if (shouldForceIntro()) return true;
     return !hasSeenIntro();
   });
   const [introPlayId, setIntroPlayId] = useState(0);
   const [appRevealing, setAppRevealing] = useState(false);
 
+  const startModuleReveal = useCallback(() => {
+    if (moduleRevealStartedRef.current) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    moduleRevealStartedRef.current = true;
+    setAppRevealing(true);
+  }, []);
+
   const { runWorkflow } = useWorkflowExecution();
   const isRunning = useWorkflowStore((s) => s.isRunning);
 
   const handleIntroComplete = useCallback(() => {
-    if (!introPreviewRef.current) markIntroSeen();
+    if (!introPreviewRef.current && !shouldForceIntro()) markIntroSeen();
     introPreviewRef.current = false;
     setIntroVisible(false);
-    setAppRevealing(true);
-  }, []);
+    startModuleReveal();
+  }, [startModuleReveal]);
 
   const replayIntro = useCallback(() => {
     introPreviewRef.current = true;
+    moduleRevealStartedRef.current = false;
     setAppRevealing(false);
     setIntroPlayId((id) => id + 1);
     setIntroVisible(true);
@@ -126,6 +136,12 @@ export default function App() {
       markIntroSeen();
     }
   }, []);
+
+  /** 已看过开场时，每次进入页面仍播放模块入场动画（线上 Demo 与本地一致） */
+  useEffect(() => {
+    if (introVisible) return;
+    startModuleReveal();
+  }, [introVisible, startModuleReveal]);
 
   useEffect(() => {
     if (!appRevealing) return;
